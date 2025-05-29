@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "./axiosInstance";
+// import axios from "axios";
 import { toast } from "react-hot-toast";
 import {
   User,
@@ -16,9 +17,9 @@ import {
 } from "lucide-react";
 
 // Create an Axios instance with the base URL from the environment variable
-const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL,
-});
+// const api = axios.create({
+//   baseURL: import.meta.env.VITE_API_BASE_URL,
+// });
 
 // Icon mapping object
 const iconMapping = {
@@ -45,7 +46,8 @@ const Menu = ({ activePage }) => {
     const fetchMenus = async () => {
       try {
         setLoading(true);
-        const response = await api.get("Menus/all",{
+        const menuId = "73B717D1-A5F0-4326-AAE3-6370A2373472";
+        const response = await api.get(`Menus/all/${menuId}`,{
           headers: {
             Authorization: `Bearer ${token}`
           }

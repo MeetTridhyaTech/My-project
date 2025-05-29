@@ -1,22 +1,25 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Login from "./components/Login";
+import Register from "./components/Register";
 import UserDashboard from "./components/UserDashboard";
-import Register from "./components/Register"; // Make sure you have a Register component
 import UsersList from "./components/ListUser";
 import AddUser from "./components/AddUser";
 import EditUser from "./components/EditUser";
-import RoleManagement from "./components/RoleManagement"; // import the RoleManagement component
+import RoleManagement from "./components/RoleManagement";
 import CreateRole from './components/CreateRole';
 import EditRole from './components/EditRole';
 import PermissionManagement from './components/PermissionManagement'; 
-// import EditPermission from "./components/AssignPermission";
 import AssignPermission from "./components/AssignPermission";
 import Sidebar from "./components/Sidebar";
 import RemovePermission from "./components/RemovePermission";
 import Menu from "./components/Menu";
 import MenuManagement from "./components/MenuManagement";
 import ListPermissions from "./components/ListPermissions";
-// import RemovePermission from "./components/RemovePermission";
+import AddPermission from "./components/AddPermission";
+// import UnauthorizedAccess from "./components/UnauthorizeAccess";
+import PermissionRoute from "./components/PermissionRoute";
+import UnauthorizedAccess from "./components/UnauthorizedAccess";
+
 
 function App() {
   return (
@@ -26,27 +29,157 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
         <Route path="/userdashboard" element={<UserDashboard />} />
-        <Route path="/userlist" element={<UsersList />} />
-        <Route path="/adduser" element={<AddUser/>}/>
-        <Route path="/edit-user/:id" element={<EditUser/>}/>
-        <Route path="/rolemanagement" element={<RoleManagement />} />
-        <Route path="/add-role" element={<CreateRole />} />
-        <Route path="/edit-role/:roleId" element={<EditRole />} />
-        <Route path="/permissionmanagement" element={<PermissionManagement />} />
-        <Route path="/assign-permission" element={<AssignPermission />} />
+        
+        {/* Protected by PermissionRoute */}
+        <Route path="/userlist/:menuId?" element={
+          <PermissionRoute permission="Read">
+            <UsersList />
+          </PermissionRoute>
+        } />
+        
+        <Route path="/adduser/:menuId?" element={
+          <PermissionRoute permission="Add">
+            <AddUser />
+          </PermissionRoute>
+        } />
+
+        <Route path="/edit-user/:id/:menuId?" element={
+          <PermissionRoute permission="Edit">
+            <EditUser />
+          </PermissionRoute>
+        } />
+
+        <Route path="/rolemanagement/:menuId?" element={
+          <PermissionRoute permission="Read">
+            <RoleManagement />
+          </PermissionRoute>
+        } />
+
+        <Route path="/add-role/:menuId?" element={
+          <PermissionRoute permission="Add">
+            <CreateRole />
+          </PermissionRoute>
+        } />
+
+        <Route path="/edit-role/:roleId" element={
+          <PermissionRoute permission="Edit">
+            <EditRole />
+          </PermissionRoute>
+        } />
+
+        <Route path="/permissionmanagement/:menuId?" element={
+          <PermissionRoute permission="Read">
+            <PermissionManagement />
+          </PermissionRoute>
+        } />
+
+        <Route path="/assign-permission/:menuId?" element={
+          <PermissionRoute permission="Add">
+            <AssignPermission />
+          </PermissionRoute>
+        } />
+
+        <Route path="/remove-permission/:menuId?" element={
+          <PermissionRoute permission="Delete">
+            <RemovePermission />
+          </PermissionRoute>
+        } />
+
+        <Route path="/menu/:menuId?" element={<Menu />} />
+        <Route path="/menu-management/:menuId?" element={<MenuManagement />} />
+
+        <Route path="/list-permissions" element={
+          <PermissionRoute permission="Read">
+            <ListPermissions />
+          </PermissionRoute>
+        } />
+
+        <Route path="/list-permissions/:menuId?" element={
+          <PermissionRoute permission="Read">
+            <RemovePermission />
+          </PermissionRoute>
+        } />
+
+        <Route path="/addpermission/:menuId?" element={
+          <PermissionRoute permission="Add">
+            <AddPermission />
+          </PermissionRoute>
+        } />
+
         <Route path="/sidebar" element={<Sidebar />} />
-        <Route path="/remove-permission" element={<RemovePermission />} />
-        <Route path="/menu" element={<Menu />} />
-        <Route path="/menu-management" element={<MenuManagement />} />
-        <Route path="/list-permissions" element={<ListPermissions />} />
-        {/* <Route path="/remove-permission" element={<RemovePermission />} /> */}
-
-
-
-        {/* <Route path="/edit-role/:id" element={<EditRole />} /> Add this line */}
-        </Routes>
+        <Route path="/unauthorizeaccess" element={<UnauthorizedAccess />} />
+      </Routes>
     </Router>
   );
 }
 
 export default App;
+
+
+
+
+
+
+
+// import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+// import Login from "./components/Login";
+// import UserDashboard from "./components/UserDashboard";
+// import Register from "./components/Register"; // Make sure you have a Register component
+// import UsersList from "./components/ListUser";
+// import AddUser from "./components/AddUser";
+// import EditUser from "./components/EditUser";
+// import RoleManagement from "./components/RoleManagement"; // import the RoleManagement component
+// import CreateRole from './components/CreateRole';
+// import EditRole from './components/EditRole';
+// import PermissionManagement from './components/PermissionManagement'; 
+// // import EditPermission from "./components/AssignPermission";
+// import AssignPermission from "./components/AssignPermission";
+// import Sidebar from "./components/Sidebar";
+// import RemovePermission from "./components/RemovePermission";
+// import Menu from "./components/Menu";
+// import MenuManagement from "./components/MenuManagement";
+// import ListPermissions from "./components/ListPermissions";
+// import AddPermission from "./components/AddPermission";
+// import UnauthorizedAccess from "./components/UnauthorizeAccess";
+// // import RemovePermission from "./components/RemovePermission";
+
+// function App() {
+//   return (
+//     <Router>
+//       <Routes>
+//         <Route path="/" element={<Login />} />
+//         <Route path="/register" element={<Register />} />
+//         <Route path="/login" element={<Login />} />
+//         <Route path="/userdashboard" element={<UserDashboard />} />
+//         <Route path="/userlist" element={<UsersList />} />
+//         <Route path="/adduser" element={<AddUser/>}/>
+//         <Route path="/edit-user/:id" element={<EditUser/>}/>
+//         <Route path="/rolemanagement" element={<RoleManagement />} />
+//         <Route path="/add-role" element={<CreateRole />} />
+//         <Route path="/edit-role/:roleId" element={<EditRole />} />
+//         <Route path="/permissionmanagement" element={<PermissionManagement />} />
+//         <Route path="/assign-permission" element={<AssignPermission />} />
+//         <Route path="/sidebar" element={<Sidebar />} />
+//         <Route path="/remove-permission" element={<RemovePermission />} />
+//         <Route path="/menu" element={<Menu />} />
+//         <Route path="/menu-management" element={<MenuManagement />} />
+//         <Route path="/list-permissions" element={<ListPermissions />} />
+//         <Route path="/addpermission" element={<AddPermission/>}/>
+//         <Route path="/unauthorizeaccess" element={<UnauthorizedAccess/>}/>
+//         {/* <Route path="/remove-permission" element={<RemovePermission />} /> */}
+
+
+
+//         {/* <Route path="/edit-role/:id" element={<EditRole />} /> Add this line */}
+//         </Routes>
+//     </Router>
+//   );
+// }
+
+// export default App;
+
+
+
+
+
+

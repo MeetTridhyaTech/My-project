@@ -1,14 +1,12 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { toast, Toaster } from "react-hot-toast";
 import api from "./axiosInstance";
 
 function Login() {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [errorMessage, setErrorMessage] = useState("");
   const [validationErrors, setValidationErrors] = useState({});
-  const [showToast, setShowToast] = useState(false);
-  const [toastMessage, setToastMessage] = useState("");
-  const [toastType, setToastType] = useState("success");
   const navigate = useNavigate();
 
   // Handle input changes
@@ -32,14 +30,12 @@ function Login() {
 
   // Handle form submission
   const handleSubmit = async (e) => {
-    e.preventDefault(); // prevent page reload
+    e.preventDefault();
 
     const errors = validateForm();
     if (Object.keys(errors).length > 0) {
       setValidationErrors(errors);
-      setToastType("error");
-      setToastMessage("Please fill in all fields.");
-      setShowToast(true);
+      toast.error("Please fill in all fields.");
       return;
     }
 
@@ -48,69 +44,40 @@ function Login() {
 
       if (response.data.success && response.data.data.token) {
         // Store token in localStorage
-        localStorage.setItem("authToken", response.data.data.token);
+        localStorage.setItem("token", response.data.data.token);
         localStorage.setItem("roleName", response.data.data.roleName);
         localStorage.setItem("roleID", response.data.data.roleID);
+        localStorage.setItem("permission", JSON.stringify(response.data.data.permissions));
 
-        // Show success toast
-        setToastType("success");
-        setToastMessage("Login successful!");
-        setShowToast(true);
+        toast.success("Login successful!");
 
         // Reset form
         setFormData({ email: "", password: "" });
         setValidationErrors({});
+        setErrorMessage("");
 
-        // Navigate to user dashboard after a short delay
+        // Navigate after short delay
         setTimeout(() => {
           navigate("/userdashboard", { replace: true });
-        }, 3000);
+        }, 2000);
       } else {
         setErrorMessage(response.data.message || "Invalid email or password.");
+        toast.error(response.data.message || "Invalid email or password.");
       }
     } catch (error) {
       console.error("Login Error:", error);
-      const msg =
-        error.response?.data?.message || "Invalid Credentials. Please try again.";
-      setToastType("error");
-      setToastMessage(msg);
-      setShowToast(true);
+      const msg = error.response?.data?.message || "Invalid Credentials. Please try again.";
       setErrorMessage(msg);
-    }
-  };
+      toast.error(msg);
+      // toast.error(msg, { duration: 3000 });
 
-  useEffect(() => {
-    if (showToast) {
-      const timer = setTimeout(() => {
-        setShowToast(false);
-      }, 3000);
-      return () => clearTimeout(timer);
     }
-  }, [showToast]);
-
-  const Toast = () => {
-    const bgColor = toastType === "success" ? "bg-green-500" : "bg-red-500";
-    return (
-      <div
-        className={`fixed top-4 right-4 ${bgColor} text-white px-6 py-3 rounded-md shadow-md flex items-center space-x-2 transition-opacity duration-300 ${
-          showToast ? "opacity-100" : "opacity-0 pointer-events-none"
-        }`}
-      >
-        <span className="text-sm font-medium">{toastMessage}</span>
-        <button
-          onClick={() => setShowToast(false)}
-          className="ml-2 text-white hover:text-gray-200"
-        >
-          ×
-        </button>
-      </div>
-    );
   };
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100">
-      {/* Toast notification */}
-      <Toast />
+      {/* React Hot Toast container */}
+      <Toaster position="top-right" reverseOrder={false} />
 
       <div className="bg-white shadow-lg rounded-lg p-8 w-96">
         <h2 className="text-3xl font-bold text-center text-gray-800 mb-6">
@@ -144,9 +111,7 @@ function Login() {
               placeholder="your@email.com"
             />
             {validationErrors.email && (
-              <p className="text-red-500 text-sm mt-1">
-                {validationErrors.email}
-              </p>
+              <p className="text-red-500 text-sm mt-1">{validationErrors.email}</p>
             )}
           </div>
 
@@ -165,9 +130,7 @@ function Login() {
               placeholder="••••••••"
             />
             {validationErrors.password && (
-              <p className="text-red-500 text-sm mt-1">
-                {validationErrors.password}
-              </p>
+              <p className="text-red-500 text-sm mt-1">{validationErrors.password}</p>
             )}
           </div>
 
@@ -183,10 +146,7 @@ function Login() {
 
         <p className="text-center text-gray-600 mt-6">
           Don't have an account?{" "}
-          <Link
-            to="/register"
-            className="text-blue-600 font-medium hover:underline"
-          >
+          <Link to="/register" className="text-blue-600 font-medium hover:underline">
             Sign up
           </Link>
         </p>

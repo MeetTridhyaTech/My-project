@@ -8,11 +8,12 @@ const EditRole = () => {
   const { roleId } = useParams(); // Get roleId from URL params
   const [roleName, setRoleName] = useState('');
   const [loading, setLoading] = useState(false);
+  const menuId = "4C0F3D47-9318-4AED-AB36-A85E78C5CDA8";      
 
   // Fetch role details based on roleId
   const fetchRoleDetails = async () => {
     try {
-      const response = await api.get(`Roles/${roleId}`);
+      const response = await api.get(`Roles/${roleId}/${menuId}`);
       setRoleName(response.data.roleName); // Set roleName from API response
     } catch (error) {
       console.error('Error fetching role:', error);
@@ -41,7 +42,7 @@ const EditRole = () => {
 
     setLoading(true);
     try {
-      await api.put(`Roles/${roleId}`, updatedRole); // Send PUT request to update role
+      await api.put(`Roles/${roleId}/${menuId}`, updatedRole); // Send PUT request to update role
       alert('Role updated successfully!');
       navigate('/rolemanagement'); // Redirect back to role list
     } catch (error) {

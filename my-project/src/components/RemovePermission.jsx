@@ -27,14 +27,16 @@ const RemovePermission = () => {
   const [isRoleDropdownOpen, setIsRoleDropdownOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const menuId = "E30AD134-1A02-44DF-ADD2-EAB782C66BBB";
+
 
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
       try {
         const [rolesRes, permissionsRes] = await Promise.all([
-          api.get("Roles"),
-          api.get("Permissions"),
+          api.get(`Roles/${menuId}`),
+          api.get(`Permissions/All/${menuId}`),
         ]);
         setRoles(rolesRes.data || []);
         setPermissions(permissionsRes.data || []);
@@ -129,7 +131,7 @@ const RemovePermission = () => {
         roleId: selectedRoleId,
         permissionIds: selectedPermissions,
       };
-      await api.post("Permissions/remove-bulk", payload);
+      await api.post(`Permissions/remove-bulk/${menuId}`, payload);
       
       toast.success("Permissions deleted successfully!", {
         icon: "✅",
@@ -199,47 +201,6 @@ const RemovePermission = () => {
 
       {/* Sidebar */}
         <Sidebar activePage="/remove-permission" />
-
-      {/* <div className="w-1/5 min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-white p-6 flex flex-col shadow-xl">
-        <h1 className="text-2xl font-bold text-center mb-8 flex items-center gap-2">
-          <User className="w-6 h-6 text-blue-400" /> 
-          <span className="bg-gradient-to-r from-blue-300 to-indigo-300 text-transparent bg-clip-text">
-            Admin Dashboard
-          </span>
-        </h1>
-        <ul className="space-y-3">
-          <li
-            className="flex items-center gap-2 p-3 rounded-lg cursor-pointer transition duration-300 hover:bg-gray-700"
-            onClick={() => navigate("/userdashboard")}
-          >
-            <HousePlus className="w-5 h-5 text-blue-300" /> <span>Home</span>
-          </li>
-          <li
-            className="flex items-center gap-2 p-3 rounded-lg cursor-pointer transition duration-300 hover:bg-gray-700"
-            onClick={() => navigate("/userlist")}
-          >
-            <Users className="w-5 h-5 text-green-300" /> <span>Users</span>
-          </li>
-          <li
-            className="flex items-center gap-2 p-3 rounded-lg cursor-pointer transition duration-300 hover:bg-gray-700"
-            onClick={() => navigate("/rolemanagement")}
-          >
-            <ShieldCheck className="w-5 h-5 text-purple-300" /> <span>Roles</span>
-          </li>
-          <li
-            className="flex items-center gap-2 p-3 bg-blue-900 bg-opacity-40 rounded-lg cursor-pointer transition duration-300 hover:bg-blue-800"
-            onClick={() => navigate("/permissionmanagement")}
-          >
-            <Shield className="w-5 h-5 text-yellow-300" /> <span>Role Permissions</span>
-          </li>
-          <li
-            className="mt-auto flex items-center gap-2 p-3 rounded-lg cursor-pointer transition duration-300 hover:bg-red-700 bg-red-800 bg-opacity-40"
-            onClick={handleLogout}
-          >
-            <LogOut className="w-5 h-5 text-red-300" /> <span>Logout</span>
-          </li>
-        </ul>
-      </div> */}
 
       {/* Main Content */}
       <div className="w-4/5 p-6 bg-gray-50">

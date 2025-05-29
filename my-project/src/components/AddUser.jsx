@@ -17,11 +17,12 @@ const AddUser = () => {
   const [roles, setRoles] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const menuId = "17DEC13F-8C9F-4287-A918-774375AC1B76";
 
   useEffect(() => {
     const fetchRoles = async () => {
       try {
-        const response = await api.get("Roles");
+        const response = await api.get(`Roles/${menuId}`);
         const roleOptions = response.data.map((role) => ({
           value: role.roleID,
           label: role.roleName, 
@@ -59,7 +60,7 @@ const AddUser = () => {
       };
       console.log("Submitting Data:", requestData);
 
-      await api.post("User", requestData);
+      await api.post(`User/AddOrUpdate/${menuId}`, requestData);
 
       alert("User added successfully!");
       navigate("/userlist");

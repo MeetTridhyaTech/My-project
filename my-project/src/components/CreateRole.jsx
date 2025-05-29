@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import api from './axiosInstance'; // Import Axios instance
+import api from './axiosInstance';
 import { toast } from 'react-hot-toast';
-import Sidebar from './Sidebar'; // Import the Sidebar component
+import Sidebar from './Sidebar';
 
 const CreateRole = () => {
   const navigate = useNavigate();
@@ -17,6 +17,8 @@ const CreateRole = () => {
       return v.toString(16);
     });
   };
+
+    const menuId = "4C0F3D47-9318-4AED-AB36-A85E78C5CDA8";      
 
   // Handle form submit
   const handleSubmit = async (e) => {
@@ -42,7 +44,7 @@ const CreateRole = () => {
 
     setLoading(true);
     try {
-      await api.post('Roles', newRole);
+      await api.post(`Roles/${menuId}`, newRole);
       toast.success('Role created successfully!', {
         icon: '✅',
         duration: 3000,

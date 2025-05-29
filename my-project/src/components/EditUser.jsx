@@ -18,12 +18,13 @@ const EditUser = () => {
   const [roles, setRoles] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+      const menuId = "17DEC13F-8C9F-4287-A918-774375AC1B76";
 
   useEffect(() => {
     const fetchUserData = async () => {
       try {
         // Fetch roles
-        const rolesResponse = await api.get(`Roles`);
+        const rolesResponse = await api.get(`Roles/${menuId}`);
         const roleOptions = rolesResponse.data.map((role) => ({
           value: role.roleID,
           label: role.roleName,
