@@ -181,8 +181,6 @@ const MenuManagement = () => {
         },
       });
       
-      // Assuming the API returns an array of role objects with a 'name' property
-      // Adjust this based on your actual API response structure
       if (Array.isArray(response.data)) {
         const roleNames = response.data.map(role => role.name || role.roleName || role.title || role);
         setAvailableRoles(roleNames);

@@ -59,18 +59,6 @@ const ListPermissions = () => {
     }
   };
 
-  //   const handleEdit = (id) => {
-  //     toast("Edit permission functionality to be implemented ✏️",
-  //      {
-  //       icon: "⚠️",
-  //       style: {
-  //         borderRadius: "10px",
-  //         background: "#333",
-  //         color: "#fff",
-  //       },
-  //     });
-  //   };
-
   useEffect(() => {
     fetchPermissions();
   }, []);

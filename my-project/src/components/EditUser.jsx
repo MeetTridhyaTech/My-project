@@ -18,7 +18,7 @@ const EditUser = () => {
   const [roles, setRoles] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-      const menuId = "17DEC13F-8C9F-4287-A918-774375AC1B76";
+  const menuId = "17DEC13F-8C9F-4287-A918-774375AC1B76";
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -32,7 +32,7 @@ const EditUser = () => {
         setRoles(roleOptions);
 
         // Fetch user details
-        const userResponse = await api.get(`User/${id}`);
+        const userResponse = await api.get(`User/${id}/${menuId}`);
         const user = userResponse.data;
 
         setFormData({
@@ -74,7 +74,7 @@ const EditUser = () => {
         roleID: formData.roleName?.value,
       };
 
-      await api.post(`User/AddOrUpdate?id=${id}`, requestData);
+      await api.post(`User/AddOrUpdate/${menuId}?id=${id}`, requestData);
       alert("User updated successfully!");
       navigate("/userlist");
     } catch (err) {

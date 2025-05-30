@@ -1,4 +1,4 @@
-import React from "react";
+// import React from "react";
 
 const Pagination = ({ currentPage, totalPages, onPageChange }) => {
   const getPaginationNumbers = () => {
@@ -35,7 +35,7 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
     <div className="flex items-center justify-center mt-4 space-x-2">
       <button
         onClick={() => onPageChange(currentPage - 1)}
-        disabled={currentPage === 1}
+        disabled={currentPage === 1}  
         className="px-3 py-1 text-gray-600 bg-gray-200 rounded-md hover:bg-gray-300 disabled:opacity-50"
       >
         Prev
