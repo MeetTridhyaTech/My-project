@@ -150,4 +150,4 @@ const ListPermissions = () => {
 
 };
 
-export default ListPermissions;
+export default ListPermissions; 
