@@ -48,6 +48,7 @@ function Login() {
         localStorage.setItem("roleName", response.data.data.roleName);
         localStorage.setItem("roleID", response.data.data.roleID);
         localStorage.setItem("permission", JSON.stringify(response.data.data.permissions));
+        localStorage.setItem("refreshToken", response.data.data.refreshToken);
 
         toast.success("Login successful!");
 

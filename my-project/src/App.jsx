@@ -19,6 +19,7 @@ import AddPermission from "./components/AddPermission";
 // import UnauthorizedAccess from "./components/UnauthorizeAccess";
 import PermissionRoute from "./components/PermissionRoute";
 import UnauthorizedAccess from "./components/UnauthorizedAccess";
+import TableFilter from "./components/TableFilter";
 
 
 function App() {
@@ -29,6 +30,7 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
         <Route path="/userdashboard" element={<UserDashboard />} />
+        <Route path="/tablefilter" element={<TableFilter/>} /> 
         
         {/* Protected by PermissionRoute */}
         <Route path="/userlist/:menuId?" element={

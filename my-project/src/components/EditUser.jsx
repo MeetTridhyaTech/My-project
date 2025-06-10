@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Select from "react-select";
 import api from "./axiosInstance";
+import Sidebar from './Sidebar';
 
 const EditUser = () => {
   const navigate = useNavigate();
@@ -12,7 +13,7 @@ const EditUser = () => {
     email: "",
     mobile: "",
     password: "", 
-    roleName: null, 
+    roleName: "", 
   });
 
   const [roles, setRoles] = useState([]);
@@ -33,15 +34,15 @@ const EditUser = () => {
 
         // Fetch user details
         const userResponse = await api.get(`User/${id}/${menuId}`);
-        const user = userResponse.data;
+        const user = userResponse.data.data;
 
         setFormData({
           firstName: user.firstName || "", 
           lastName: user.lastName || "",
           email: user.email || "",
           mobile: user.mobile || "",
-          password: "", 
-          roleName: roleOptions.find((role) => role.value === user.roleID) || null,
+          password: user.password || "", 
+          roleName: roleOptions.find((r) => r.value === user.RoleID) || null,
         });
       } catch (err) {
         setError("Failed to fetch user data");
@@ -85,28 +86,95 @@ const EditUser = () => {
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-100">
-      <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
-        <h2 className="text-2xl font-bold text-gray-800 text-center mb-6">Edit User</h2>
-        {error && <p className="text-red-500 text-center">{error}</p>}
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <input type="text" name="firstName" placeholder="First Name" value={formData.firstName} onChange={handleChange} required className="w-full p-3 border rounded-md" />
-          <input type="text" name="lastName" placeholder="Last Name" value={formData.lastName} onChange={handleChange} required className="w-full p-3 border rounded-md" />
-          <input type="email" name="email" placeholder="Email" value={formData.email} onChange={handleChange} required className="w-full p-3 border rounded-md" />
-          <input type="tel" name="mobile" placeholder="Mobile Number" value={formData.mobile} onChange={handleChange} required className="w-full p-3 border rounded-md" />
+    <div className="flex min-h-screen bg-gray-100">
+      {/* Sidebar */}
+      <Sidebar activePage="/userlist" />
+      
+      {/* Main Content */}
+      <div className="flex-1 flex justify-center items-center p-4">
+        <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
+          <h2 className="text-2xl font-bold text-gray-800 text-center mb-6">Edit User</h2>
+          {error && <p className="text-red-500 text-center mb-4">{error}</p>}
           
-          <input type="password" name="password" placeholder="New Password" value={formData.password} onChange={handleChange} className="w-full p-3 border rounded-md" />
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <input 
+              type="text" 
+              name="firstName" 
+              placeholder="First Name" 
+              value={formData.firstName} 
+              onChange={handleChange} 
+              required 
+              className="w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500" 
+            />
+            
+            <input 
+              type="text" 
+              name="lastName" 
+              placeholder="Last Name" 
+              value={formData.lastName} 
+              onChange={handleChange} 
+              required 
+              className="w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500" 
+            />
+            
+            <input 
+              type="email" 
+              name="email" 
+              placeholder="Email" 
+              value={formData.email} 
+              onChange={handleChange} 
+              required 
+              className="w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500" 
+            />
+            
+            <input 
+              type="tel" 
+              name="mobile" 
+              placeholder="Mobile Number" 
+              value={formData.mobile} 
+              onChange={handleChange} 
+              required 
+              className="w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500" 
+            />
+            
+            <input 
+              type="password" 
+              name="password" 
+              placeholder="Password" 
+              value={formData.password} 
+              onChange={handleChange} 
+              className="w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500" 
+            />
 
-          <Select options={roles} value={formData.roleName} onChange={handleRoleChange} className="w-full" placeholder="Select Role" />
+            <div className="w-full">
+              <Select 
+                options={roles} 
+                value={formData.roleName} 
+                onChange={handleRoleChange} 
+                className="w-full" 
+                placeholder="Select Role"
+                isClearable
+              />
+            </div>
 
-          <button type="submit" disabled={loading} className={`w-full p-3 rounded-md text-white font-semibold transition ${loading ? "bg-gray-400" : "bg-green-500 hover:bg-green-600"}`}>
-            {loading ? "Updating..." : "Update User"}
+            <button 
+              type="submit" 
+              disabled={loading} 
+              className={`w-full p-3 rounded-md text-white font-semibold transition ${
+                loading ? "bg-gray-400 cursor-not-allowed" : "bg-green-500 hover:bg-green-600"
+              }`}
+            >
+              {loading ? "Updating..." : "Update User"}
+            </button>
+          </form>
+
+          <button 
+            className="w-full mt-4 p-3 bg-gray-500 hover:bg-gray-600 text-white rounded-md transition-colors" 
+            onClick={() => navigate("/userlist")}
+          >
+            Cancel
           </button>
-        </form>
-
-        <button className="w-full mt-4 p-3 bg-gray-500 hover:bg-gray-600 text-white rounded-md" onClick={() => navigate("/userlist")}>
-          Cancel
-        </button>
+        </div>
       </div>
     </div>
   );

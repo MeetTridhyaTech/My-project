@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "./axiosInstance";
-// import axios from "axios";
 import { toast } from "react-hot-toast";
 import {
   User,
@@ -15,11 +14,6 @@ import {
   Settings,
   FileText
 } from "lucide-react";
-
-// Create an Axios instance with the base URL from the environment variable
-// const api = axios.create({
-//   baseURL: import.meta.env.VITE_API_BASE_URL,
-// });
 
 // Icon mapping object
 const iconMapping = {
@@ -98,14 +92,6 @@ const Menu = ({ activePage }) => {
     
     return <User className="w-5 h-5 text-blue-300" />;
   };
-
-  // Check if user has permission to see the menu
-  // const hasPermission = (menu) => {
-  //   // Example of a role-based permission check
-  //   // This would need to be implemented based on your permission structure
-  //   // For now, we'll assume all menus are visible
-  //   return true;
-  // };
 
   // Render menu item with possible submenus
   const renderMenuItem = (menu) => {
