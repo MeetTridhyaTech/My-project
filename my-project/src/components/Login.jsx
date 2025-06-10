@@ -128,7 +128,7 @@ function Login() {
               className={`w-full p-3 border ${
                 validationErrors.password ? "border-red-500" : "border-gray-300"
               } rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all`}
-              placeholder="••••••••"
+              placeholder="password"
             />
             {validationErrors.password && (
               <p className="text-red-500 text-sm mt-1">{validationErrors.password}</p>
