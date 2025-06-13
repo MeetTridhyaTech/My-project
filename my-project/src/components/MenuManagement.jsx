@@ -1,8 +1,9 @@
 // import { useState, useEffect } from "react";
 // import api from "./axiosInstance";
 // import { toast } from "react-hot-toast";
-// import { Menu as MenuIcon, Save, Trash2, Edit, Search, ChevronDown, X } from "lucide-react";
+// import { Menu as MenuIcon, Save, Trash2, Edit, ChevronDown, X } from "lucide-react";
 // import Sidebar from "./Sidebar";
+// import TableFilter from "./TableFilter";
 
 // // Multi-Select Dropdown Component
 // const MultiSelectDropdown = ({ options, selectedValues, onChange, placeholder = "Select roles..." }) => {
@@ -108,23 +109,29 @@
 //   const [menus, setMenus] = useState([]);
 //   const [loading, setLoading] = useState(true);
 //   const [editingMenu, setEditingMenu] = useState(null);
-//   const [searchQuery, setSearchQuery] = useState("");
-//   const [filteredMenus, setFilteredMenus] = useState([]);
 //   const [userPermissions, setUserPermissions] = useState([]);
-  
+//   const [availableRoles, setAvailableRoles] = useState([]);
+//   const [filters, setFilters] = useState([]);
+//   const [filteredMenus, setFilteredMenus] = useState([]);
+//   // const filterButtonRefs = useRef({});
+
+//   // Define column types for the filter
+//   const columnTypes = {
+//     title: "string",
+//     icon: "string",
+//     path: "string",
+//     order: "number",
+//     roleName: "string"
+//   };
+
+//   // Columns to show in the table
+//   const columns = ["title", "icon", "path", "order", "roleName"];
+
 //   const canAdd = userPermissions.includes("Add");
 //   const canEdit = userPermissions.includes("Edit");
 //   const canDelete = userPermissions.includes("Delete");
 
-//   // State for available roles loaded from API
-//   const [availableRoles, setAvailableRoles] = useState([]);
-
-//   useEffect(() => {
-//     const storedPermissions = JSON.parse(localStorage.getItem("permission")) || [];
-//     setUserPermissions(storedPermissions);
-//   }, []);
-  
-//   // Form states - Modified to handle array of roles
+//   // Form states
 //   const [menuForm, setMenuForm] = useState({
 //     title: "",
 //     icon: "",
@@ -157,20 +164,44 @@
 //     fetchRoles();
 //   }, []);
 
-//   // Filter menus when search query or menus change
+//   // Filter menus when filters or menus change
 //   useEffect(() => {
-//     if (searchQuery.trim() === "") {
+//     if (filters.length === 0) {
 //       setFilteredMenus(menus);
-//     } else {
-//       const query = searchQuery.toLowerCase();
-//       const filtered = menus.filter(menu => 
-//         menu.title.toLowerCase().includes(query) || 
-//         menu.path.toLowerCase().includes(query) || 
-//         (menu.roleName && menu.roleName.toLowerCase().includes(query))
-//       );
-//       setFilteredMenus(filtered);
+//       return;
 //     }
-//   }, [searchQuery, menus]);
+
+//     const filtered = menus.filter(menu => {
+//       return filters.every(filter => {
+//         let columnValue = menu[filter.columnName] || '';
+//         // Handle roleName specially since it's a comma-separated string
+//         if (filter.columnName === 'roleName') {
+//           columnValue = columnValue.split(',').map(r => r.trim()).join(', ');
+//         }
+//         columnValue = String(columnValue).toLowerCase();
+//         const filterValue = filter.value.toLowerCase();
+        
+//         switch (filter.condition) {
+//           case "contains":
+//             return columnValue.includes(filterValue);
+//           case "notcontains":
+//             return !columnValue.includes(filterValue);
+//           case "startswith":
+//             return columnValue.startsWith(filterValue);
+//           case "endswith":
+//             return columnValue.endsWith(filterValue);
+//           case "equals":
+//             return columnValue === filterValue;
+//           case "notequals":
+//             return columnValue !== filterValue;
+//           default:
+//             return true;
+//         }
+//       });
+//     });
+
+//     setFilteredMenus(filtered);
+//   }, [filters, menus]);
 
 //   const fetchRoles = async () => {
 //     try {
@@ -188,7 +219,6 @@
 //     } catch (error) {
 //       console.error("Error fetching roles:", error);
 //       toast.error("Failed to load roles");
-//       // Fallback to some default roles if API fails
 //       setAvailableRoles([]);
 //     }
 //   };
@@ -215,7 +245,7 @@
 //     }
 //   };
 
-//   // Set form values when editing a menu - Modified to handle role arrays
+//   // Set form values when editing a menu
 //   useEffect(() => {
 //     if (editingMenu) {
 //       setMenuForm({
@@ -238,7 +268,6 @@
 //     }));
 //   };
 
-//   // Handle role selection change
 //   const handleRoleChange = (selectedRoles) => {
 //     setMenuForm(prev => ({
 //       ...prev,
@@ -266,10 +295,9 @@
 //     }
 
 //     try {
-//       // Convert roleNames array back to comma-separated string for backend
 //       const menuData = {
 //         ...menuForm,
-//         roleName: menuForm.roleNames.join(', '), // Convert array to string
+//         roleName: menuForm.roleNames.join(', '),
 //         id: editingMenu ? editingMenu.id : null
 //       };
 
@@ -318,13 +346,30 @@
 //     }
 //   };
 
-//   const handleSearchChange = (e) => {
-//     setSearchQuery(e.target.value);
+//   const handleApplyFilter = (newFilter) => {
+//     setFilters(prev => {
+//       const existingIndex = prev.findIndex(f => f.columnName === newFilter.columnName);
+//       if (existingIndex >= 0) {
+//         const updated = [...prev];
+//         updated[existingIndex] = newFilter;
+//         return updated;
+//       }
+//       return [...prev, newFilter];
+//     });
 //   };
 
-//   const clearSearch = () => {
-//     setSearchQuery("");
+//   const handleClearColumnFilter = (columnName) => {
+//     setFilters(prev => prev.filter(f => f.columnName !== columnName));
 //   };
+
+//   const handleResetFilters = () => {
+//     setFilters([]);
+//   };
+
+//   useEffect(() => {
+//     const storedPermissions = JSON.parse(localStorage.getItem("permission")) || [];
+//     setUserPermissions(storedPermissions);
+//   }, []);
 
 //   return (
 //     <div className="flex h-screen bg-gray-100">
@@ -395,7 +440,6 @@
 //                   )}       
 //                 </div>
 
-//                 {/* Updated Role Selection with Multi-Select Dropdown */}
 //                 <div>
 //                   <label className="block text-sm font-medium text-gray-700 mb-1">
 //                     Role Names
@@ -455,32 +499,40 @@
 //             </form>
 //           </div>
 
-//           {/* Menu List with Search */}
+//           {/* Menu List with Filters */}
 //           <div className="bg-white p-6 rounded-lg shadow-md">
 //             <div className="flex justify-between items-center mb-4">
 //               <h2 className="text-xl font-semibold">Menu List</h2>
-//               <div className="relative">
-//                 <div className="flex items-center border rounded-md pr-2">
-//                   <input
-//                     type="text"
-//                     placeholder="Search menus..."
-//                     value={searchQuery}
-//                     onChange={handleSearchChange}
-//                     className="p-2 w-64 rounded-md focus:outline-none"
-//                   />
-//                   {searchQuery ? (
-//                     <button 
-//                       onClick={clearSearch}
-//                       className="text-gray-500 hover:text-gray-700"
-//                     >
-//                       ✕
-//                     </button>
-//                   ) : (
-//                     <Search className="w-4 h-4 text-gray-500" />
-//                   )}
-//                 </div>
-//               </div>
 //             </div>
+            
+//             {/* Active Filters Display */}
+//             {filters.length > 0 && (
+//               <div className="mt-4 flex flex-wrap gap-2 mb-4">
+//                 {filters.map((filter, index) => (
+//                   <div 
+//                     key={index} 
+//                     className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full flex items-center gap-2"
+//                   >
+//                     <span className="font-medium">{filter.columnName}</span>
+//                     <span className="text-sm">{filter.condition}</span>
+//                     <span className="font-semibold">"{filter.value}"</span>
+//                     <button 
+//                       onClick={() => handleClearColumnFilter(filter.columnName)}
+//                       className="text-blue-600 hover:text-blue-800 flex items-center"
+//                       title="Clear this filter"
+//                     >
+//                       <X size={16} />
+//                     </button>
+//                   </div>
+//                 ))}
+//                 <button
+//                   onClick={handleResetFilters}
+//                   className="flex items-center gap-1 text-sm bg-gray-200 hover:bg-gray-300 px-3 py-1 rounded"
+//                 >
+//                   <X size={14} /> Clear All Filters
+//                 </button>
+//               </div>
+//             )}
             
 //             {loading ? (
 //               <div className="flex justify-center items-center h-40">
@@ -488,28 +540,28 @@
 //               </div>
 //             ) : filteredMenus.length === 0 ? (
 //               <p className="text-gray-500 text-center py-4">
-//                 {searchQuery ? "No menus match your search" : "No menus found"}
+//                 {filters.length ? "No menus match your filters" : "No menus found"}
 //               </p>
 //             ) : (
 //               <div className="overflow-x-auto">
 //                 <table className="min-w-full table-auto">
 //                   <thead className="bg-gray-50">
 //                     <tr>
-//                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-//                         Title
-//                       </th>
-//                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-//                         Icon
-//                       </th>
-//                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-//                         Path
-//                       </th>
-//                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-//                         Order
-//                       </th>
-//                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-//                         Roles
-//                       </th>
+//                       {columns.map(column => (
+//                         <th key={column} className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+//                           <div className="flex items-center gap-2">
+//                             {column.charAt(0).toUpperCase() + column.slice(1)}
+//                             <TableFilter
+//                               columns={[column]}
+//                               columnTypes={columnTypes}
+//                               filters={filters.filter(f => f.columnName === column)}
+//                               onApplyFilter={handleApplyFilter}
+//                               onClearColumnFilter={handleClearColumnFilter}
+//                               onResetFilters={handleResetFilters}
+//                             />
+//                           </div>
+//                         </th>
+//                       ))}
 //                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
 //                         Actions
 //                       </th>
@@ -570,14 +622,20 @@
 // export default MenuManagement;
 
 
-
-
 import { useState, useEffect } from "react";
-import api from "./axiosInstance";
+import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-hot-toast";
 import { Menu as MenuIcon, Save, Trash2, Edit, ChevronDown, X } from "lucide-react";
 import Sidebar from "./Sidebar";
 import TableFilter from "./TableFilter";
+import {
+  fetchMenus,
+  createMenu,
+  updateMenu,
+  deleteMenu,
+  fetchRoles,
+  resetStatus
+} from "../../features/menus/menuSlice"; // Adjust path as needed
 
 // Multi-Select Dropdown Component
 const MultiSelectDropdown = ({ options, selectedValues, onChange, placeholder = "Select roles..." }) => {
@@ -680,19 +738,29 @@ const MultiSelectDropdown = ({ options, selectedValues, onChange, placeholder = 
 };
 
 const MenuManagement = () => {
-  const [menus, setMenus] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const dispatch = useDispatch();
+  
+  // Redux state
+  const { 
+    menus = [], 
+    availableRoles = [], 
+    loading, 
+    rolesLoading, 
+    error, 
+    success, 
+    operationType 
+  } = useSelector((state) => state.menus);
+
+  // Local state
   const [editingMenu, setEditingMenu] = useState(null);
   const [userPermissions, setUserPermissions] = useState([]);
-  const [availableRoles, setAvailableRoles] = useState([]);
   const [filters, setFilters] = useState([]);
   const [filteredMenus, setFilteredMenus] = useState([]);
-  // const filterButtonRefs = useRef({});
 
   // Define column types for the filter
   const columnTypes = {
     title: "string",
-    icon: "string",
+    icon: "string", 
     path: "string",
     order: "number",
     roleName: "string"
@@ -732,11 +800,38 @@ const MenuManagement = () => {
     "ShoppingCart"
   ];
 
-  // Fetch menus and roles
+  // Load user permissions
   useEffect(() => {
-    fetchMenus();
-    fetchRoles();
+    const storedPermissions = JSON.parse(localStorage.getItem("permission")) || [];
+    setUserPermissions(storedPermissions);
   }, []);
+
+  // Fetch menus and roles on component mount
+  useEffect(() => {
+    dispatch(fetchMenus(menuId));
+    dispatch(fetchRoles(menuId));
+  }, [dispatch, menuId]);
+
+  // Handle Redux state changes (success/error)
+  useEffect(() => {
+    if (success) {
+      toast.success(success);
+      dispatch(resetStatus());
+      
+      // Reset form and editing state on successful create/update
+      if (operationType === 'create' || operationType === 'update') {
+        resetMenuForm();
+        setEditingMenu(null);
+        // Refresh menus list
+        dispatch(fetchMenus(menuId));
+      }
+    }
+
+    if (error) {
+      toast.error(error);
+      dispatch(resetStatus());
+    }
+  }, [success, error, operationType, dispatch, menuId]);
 
   // Filter menus when filters or menus change
   useEffect(() => {
@@ -776,48 +871,6 @@ const MenuManagement = () => {
 
     setFilteredMenus(filtered);
   }, [filters, menus]);
-
-  const fetchRoles = async () => {
-    try {
-      const token = localStorage.getItem("authToken");
-      const response = await api.get(`Roles/${menuId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      
-      if (Array.isArray(response.data)) {
-        const roleNames = response.data.map(role => role.name || role.roleName || role.title || role);
-        setAvailableRoles(roleNames);
-      }
-    } catch (error) {
-      console.error("Error fetching roles:", error);
-      toast.error("Failed to load roles");
-      setAvailableRoles([]);
-    }
-  };
-
-  const fetchMenus = async () => {
-    try {
-      setLoading(true);
-      const token = localStorage.getItem("authToken"); 
-      const response = await api.get(`Menus/all/${menuId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      if (Array.isArray(response.data)) {
-        const sortedMenus = response.data.sort((a, b) => a.order - b.order);
-        setMenus(sortedMenus);
-        setFilteredMenus(sortedMenus);
-      }
-    } catch (error) {
-      console.error("Error fetching menus:", error);
-      toast.error("Failed to load menus");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   // Set form values when editing a menu
   useEffect(() => {
@@ -868,27 +921,16 @@ const MenuManagement = () => {
       return;
     }
 
-    try {
-      const menuData = {
-        ...menuForm,
-        roleName: menuForm.roleNames.join(', '),
-        id: editingMenu ? editingMenu.id : null
-      };
+    const menuData = {
+      ...menuForm,
+      roleName: menuForm.roleNames.join(', '),
+      id: editingMenu ? editingMenu.id : null
+    };
 
-      if (editingMenu) {
-        await api.put(`Menus/update/${menuData.id}/${menuId}`, menuData);
-        toast.success("Menu updated successfully");
-      } else {
-        await api.post(`Menus/create/${menuId}`, menuData);
-        toast.success("Menu created successfully");
-      }
-
-      resetMenuForm();
-      setEditingMenu(null);
-      fetchMenus();
-    } catch (error) {
-      console.error("Error saving menu:", error);
-      toast.error("Failed to save menu");
+    if (editingMenu) {
+      dispatch(updateMenu({ menuData, menuId }));
+    } else {
+      dispatch(createMenu({ menuData, menuId }));
     }
   };
 
@@ -909,14 +951,7 @@ const MenuManagement = () => {
 
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this menu?")) {
-      try {
-        await api.delete(`Menus/${id}/${menuId}`);
-        toast.success("Menu deleted successfully");
-        fetchMenus();
-      } catch (error) {
-        console.error("Error deleting menu:", error);
-        toast.error("Failed to delete menu");
-      }
+      dispatch(deleteMenu({ id, menuId }));
     }
   };
 
@@ -939,11 +974,6 @@ const MenuManagement = () => {
   const handleResetFilters = () => {
     setFilters([]);
   };
-
-  useEffect(() => {
-    const storedPermissions = JSON.parse(localStorage.getItem("permission")) || [];
-    setUserPermissions(storedPermissions);
-  }, []);
 
   return (
     <div className="flex h-screen bg-gray-100">
@@ -974,6 +1004,7 @@ const MenuManagement = () => {
                     value={menuForm.title}
                     onChange={handleMenuFormChange}
                     className="w-full p-2 border rounded-md"
+                    disabled={loading}
                   />
                   {formErrors.title && (
                     <p className="text-red-500 text-sm mt-1">{formErrors.title}</p>
@@ -989,6 +1020,7 @@ const MenuManagement = () => {
                     value={menuForm.icon}
                     onChange={handleMenuFormChange}
                     className="w-full p-2 border rounded-md"
+                    disabled={loading}
                   >
                     <option value="">Select an icon</option>
                     {iconOptions.map((icon) => (
@@ -1008,6 +1040,7 @@ const MenuManagement = () => {
                     value={menuForm.path}
                     onChange={handleMenuFormChange}
                     className="w-full p-2 border rounded-md"
+                    disabled={loading}
                   />
                   {formErrors.path && (
                     <p className="text-red-500 text-sm mt-1">{formErrors.path}</p>
@@ -1017,6 +1050,7 @@ const MenuManagement = () => {
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Role Names
+                    {rolesLoading && <span className="text-sm text-gray-500"> (Loading...)</span>}
                   </label>
                   <MultiSelectDropdown
                     options={availableRoles}
@@ -1040,6 +1074,7 @@ const MenuManagement = () => {
                     onChange={handleMenuFormChange}
                     className="w-full p-2 border rounded-md"
                     min={1}
+                    disabled={loading}
                   />
                   {formErrors.order && (
                     <p className="text-red-500 text-sm mt-1">{formErrors.order}</p>
@@ -1051,10 +1086,11 @@ const MenuManagement = () => {
                 {canAdd && (
                   <button
                     type="submit"
-                    className="bg-blue-600 text-white px-4 py-2 rounded-md flex items-center gap-1 hover:bg-blue-700"
+                    disabled={loading}
+                    className="bg-blue-600 text-white px-4 py-2 rounded-md flex items-center gap-1 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <Save className="w-4 h-4" />
-                    {editingMenu ? "Update Menu" : "Save Menu"}
+                    {loading ? "Saving..." : (editingMenu ? "Update Menu" : "Save Menu")}
                   </button>
                 )}
                 {editingMenu && (
@@ -1064,7 +1100,8 @@ const MenuManagement = () => {
                       resetMenuForm();
                       setEditingMenu(null);
                     }}
-                    className="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600"
+                    disabled={loading}
+                    className="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 disabled:opacity-50"
                   >
                     Cancel
                   </button>
@@ -1165,7 +1202,8 @@ const MenuManagement = () => {
                             {canEdit && (
                               <button
                                 onClick={() => handleEdit(menu)}
-                                className="text-blue-600 hover:text-blue-800"
+                                disabled={loading}
+                                className="text-blue-600 hover:text-blue-800 disabled:opacity-50"
                               >
                                 <Edit className="w-5 h-5" />
                               </button>
@@ -1173,7 +1211,8 @@ const MenuManagement = () => {
                             {canDelete && (
                               <button
                                 onClick={() => handleDelete(menu.id)}
-                                className="text-red-600 hover:text-red-800"
+                                disabled={loading}
+                                className="text-red-600 hover:text-red-800 disabled:opacity-50"
                               >
                                 <Trash2 className="w-5 h-5" />
                               </button>

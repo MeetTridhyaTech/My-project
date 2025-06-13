@@ -4,6 +4,7 @@ import roleReducer from '../../features/Roles/RoleSlice';
 import permissionReducer from '../../features/Permissions/permissionSlice';
 import rolePermissionReducer from '../../features/RoleMenuPermissions/RoleMenuPermissionSlice';
 import assignPermissionReducer from '../../features/assignPermissions/assignPermissionSlice';
+import menuReducer from '../../features/menus/menuSlice';
 
 export const store = configureStore({
   reducer: {
@@ -12,6 +13,7 @@ export const store = configureStore({
     permissions: permissionReducer,
     rolePermissions: rolePermissionReducer,
     assignPermissions: assignPermissionReducer,
+    menus: menuReducer,
   },
 });
 

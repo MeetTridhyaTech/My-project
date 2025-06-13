@@ -32,6 +32,7 @@ export const assignRoleMenuPermission = createAsyncThunk(
   }
 );
 
+
 const rolePermissionSlice = createSlice({
   name: 'rolePermissions',
   initialState: {
