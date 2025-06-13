@@ -230,8 +230,8 @@
 
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import api from "./axiosInstance";
-import { toast } from "react-hot-toast";
+// import api from "./axiosInstance";
+// import { toast } from "react-hot-toast";
 import {
   Trash2,
   Shield,
@@ -245,17 +245,25 @@ import {
   X,
 } from "lucide-react";
 import Sidebar from "./Sidebar";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchRolePermissions  } from "../../features/RoleMenuPermissions/RoleMenuPermissionSlice";
 
 const PermissionManagement = () => {
   const navigate = useNavigate();
-  const [permissions, setPermissions] = useState([]);
-  const [loading, setLoading] = useState(true);
+  // const [permissions, setPermissions] = useState([]);
+  // const [loading, setLoading] = useState(true);
+  const dispatch = useDispatch();
+  const { data: permissions, loading, error } = useSelector((state) => state.rolePermissions);
   const [userPermissions, setUserPermissions] = useState([]);
   const [selectedMenu, setSelectedMenu] = useState(null);
   const [showModal, setShowModal] = useState(false);
   
   const canAdd = userPermissions.includes("Add");
   const canDelete = userPermissions.includes("Delete");
+
+    useEffect(() => {
+    dispatch(fetchRolePermissions(menuId));
+  }, [dispatch]);
 
   useEffect(() => {
     const storedPermissions = JSON.parse(localStorage.getItem("permission")) || [];
@@ -274,21 +282,21 @@ const PermissionManagement = () => {
     setSelectedMenu(null);
   };
 
-  const fetchPermissions = async () => {
-    try {
-      const permissionsRes = await api.get(`Permissions/roles-with-permissions/${menuId}`);
-      setPermissions(permissionsRes.data || []);
-    } catch (error) {
-      console.error("Error fetching permissions:", error);
-      toast.error("Failed to fetch permissions ❌");
-    } finally {
-      setLoading(false);
-    }
-  };
+  // const fetchPermissions = async () => {
+  //   try {
+  //     const permissionsRes = await api.get(`Permissions/roles-with-permissions/${menuId}`);
+  //     setPermissions(permissionsRes.data || []);
+  //   } catch (error) {
+  //     console.error("Error fetching permissions:", error);
+  //     toast.error("Failed to fetch permissions ❌");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
-  useEffect(() => {
-    fetchPermissions();
-  }, []);
+  // useEffect(() => {
+  //   fetchPermissions();
+  // }, []);
 
   const handleAssignPermission = () => {
     navigate("/assign-permission");

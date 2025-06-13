@@ -397,7 +397,7 @@
 
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import api from "./axiosInstance";
+import { useDispatch, useSelector } from "react-redux";
 import { toast, Toaster } from "react-hot-toast";
 import {
   Shield,
@@ -410,20 +410,47 @@ import {
   Menu,
 } from "lucide-react";
 import Sidebar from "./Sidebar";
+import { 
+  fetchRoles, 
+  fetchMenus, 
+  fetchPermissions,
+  assignRoleMenuPermission 
+} from "../../features/assignPermissions/assignPermissionSlice";
 
 const AssignPermission = () => {
   const navigate = useNavigate();
-  const [roles, setRoles] = useState([]);
-  const [menus, setMenus] = useState([]);
-  const [permissions, setPermissions] = useState([]);
+  const dispatch = useDispatch();
+  
+  // Redux state
+  const { 
+    roles, 
+    menus, 
+    permissions,
+    loading: {
+      roles: rolesLoading,
+      menus: menusLoading,
+      permissions: permissionsLoading,
+      assigning: isAssigning
+    },
+    error 
+  } = useSelector((state) => state.assignPermissions);
+
+  // Local state
   const [selectedRoleId, setSelectedRoleId] = useState("");
   const [selectedMenuId, setSelectedMenuId] = useState("");
   const [selectedPermissions, setSelectedPermissions] = useState([]);
   const [isRoleDropdownOpen, setIsRoleDropdownOpen] = useState(false);
   const [isMenuDropdownOpen, setIsMenuDropdownOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [userPermissions, setUserPermissions] = useState([]);
+  
   const menuId = "E30AD134-1A02-44DF-ADD2-EAB782C66BBB";
+  const isLoading = rolesLoading || menusLoading;
+
+  // Check user permissions
+  useEffect(() => {
+    const storedPermissions = JSON.parse(localStorage.getItem("permission")) || [];
+    setUserPermissions(storedPermissions);
+  }, []);
 
   // Enhanced toast configurations
   const notifySuccess = (message) => toast.success(message, {
@@ -435,7 +462,6 @@ const AssignPermission = () => {
       padding: "16px",
       borderRadius: "8px",
       boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
-      id: "data-loaded-toast", 
     },
     icon: <Check size={18} />,
   });
@@ -466,55 +492,51 @@ const AssignPermission = () => {
     icon: <Info size={18} />,
   });
 
+  // Initial data fetch
   useEffect(() => {
     const fetchInitialData = async () => {
-      setIsLoading(true);
       try {
-        // Fetch all data simultaneously
-        const [rolesRes, menusRes] = await Promise.all([
-          api.get(`Roles/${menuId}`),
-          api.get(`Menus/all/${menuId}`)
+        // Fetch roles and menus simultaneously
+        await Promise.all([
+          dispatch(fetchRoles(menuId)).unwrap(),
+          dispatch(fetchMenus(menuId)).unwrap()
         ]);
         
-        setRoles(rolesRes.data || []);
-        setMenus(menusRes.data || []);
-        
-        // If there are menus, fetch permissions for the first menu
-        if (menusRes.data && menusRes.data.length > 0) {
-          const firstMenuId = menusRes.data[0].id || menusRes.data[0].menuId || menusRes.data[0].menuID;
-          const permissionsRes = await api.get(`Permissions/All/${menuId}`);
-          setPermissions(permissionsRes.data || []);
-        }
-        
-        toast.success("All data loaded successfully", {
-          icon: "📋",
-          duration: 3000,
-          id: "data-loaded-toast", 
-        });
+        notifySuccess("Data loaded successfully");
       } catch (error) {
+        console.error("Failed to load initial data:", error);
         notifyError("Failed to load initial data");
-      } finally {
-        setIsLoading(false);
       }
     };
+
     fetchInitialData();
-  }, []);
+  }, [dispatch, menuId]);
 
   // Fetch permissions when menu is selected
-  const fetchPermissions = async (selectedMenuId) => {
-    try {
-      const permissionsRes = await api.get(`Permissions/All/${menuId}`);
-      setPermissions(permissionsRes.data || []);
-      toast.success("Permissions updated", {
-        icon: "🔐",
-        duration: 2000,
-        id: "permissions-loaded-toast",
-      });
-    } catch (error) {
-      notifyError("Failed to load permissions for this menu");
-      setPermissions([]);
+  useEffect(() => {
+    if (selectedMenuId) {
+      dispatch(fetchPermissions(menuId))
+        .unwrap()
+        .then(() => {
+          toast.success("Permissions updated", {
+            icon: "🔐",
+            duration: 2000,
+            id: "permissions-loaded-toast",
+          });
+        })
+        .catch((error) => {
+          console.error("Failed to load permissions:", error);
+          notifyError("Failed to load permissions for this menu");
+        });
     }
-  };
+  }, [selectedMenuId, dispatch, menuId]);
+
+  // Handle errors from Redux
+  useEffect(() => {
+    if (error) {
+      notifyError(error);
+    }
+  }, [error]);
 
   const selectRole = (roleID) => {
     setSelectedRoleId(roleID);
@@ -539,18 +561,15 @@ const AssignPermission = () => {
     setSelectedPermissions([]);
     
     const menuName = 
-    menus.find((menu) => menu.id === menuIdSelected)?.name || 
-                     menus.find((menu) => menu.menuId === menuIdSelected)?.menuName || 
-                     menus.find((menu) => menu.title === menuIdSelected)?.title ;
+      menus.find((menu) => menu.id === menuIdSelected)?.name || 
+      menus.find((menu) => menu.menuId === menuIdSelected)?.menuName || 
+      menus.find((menu) => menu.title === menuIdSelected)?.title;
     
     toast.success(`Menu "${menuName}" selected`, {
       icon: "📁",
       duration: 2000,
       id: "menu-selected-toast",
     });
-
-    // Fetch permissions for the selected menu
-    await fetchPermissions(menuIdSelected);
   };
 
   const togglePermission = (permissionId) => {
@@ -579,6 +598,7 @@ const AssignPermission = () => {
   };
 
   const handleSubmit = async () => {
+    // Validation
     if (!selectedRoleId) {
       notifyError("Please select a role");
       return;
@@ -592,14 +612,15 @@ const AssignPermission = () => {
       return;
     }
 
-    setIsSubmitting(true);
     try {
       const payload = {
         roleId: selectedRoleId,
         menuId: selectedMenuId,
         permissionIds: selectedPermissions,
       };
-      await api.post("Permissions/assign", payload);
+
+      await dispatch(assignRoleMenuPermission(payload)).unwrap();
+      
       notifySuccess("Permissions assigned successfully!");
       
       // Show loading toast before navigation
@@ -611,10 +632,10 @@ const AssignPermission = () => {
       setTimeout(() => {
         navigate("/permissionmanagement");
       }, 1200);
+      
     } catch (error) {
+      console.error("Assignment failed:", error);
       notifyError("Failed to assign permissions. Please try again.");
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -724,7 +745,7 @@ const AssignPermission = () => {
                   </div>
                 </div>
 
-                {/* Menu Dropdown - Always visible */}
+                {/* Menu Dropdown */}
                 <div className="mb-8">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Menu Selection
@@ -758,7 +779,6 @@ const AssignPermission = () => {
                         <ul className="py-1">
                           {menus.length > 0 ? (
                             menus.map((menu) => {
-                              // Handle different possible menu object structures
                               const menuId = menu.id || menu.menuId || menu.menuID;
                               const menuName = menu.name || menu.menuName || menu.title || "Unnamed Menu";
                               
@@ -792,13 +812,20 @@ const AssignPermission = () => {
                   </div>
                 </div>
 
-                {/* Permissions Grid - Always visible */}
+                {/* Permissions Grid */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-3">
                     Available Permissions
                   </label>
 
-                  {permissions.length > 0 ? (
+                  {permissionsLoading ? (
+                    <div className="flex justify-center items-center p-10 border border-dashed border-gray-300 rounded-lg">
+                      <div className="flex flex-col items-center gap-3">
+                        <div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                        <p className="text-gray-500 text-sm">Loading permissions...</p>
+                      </div>
+                    </div>
+                  ) : permissions.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {permissions.map((permission) => (
                         <div
@@ -876,13 +903,13 @@ const AssignPermission = () => {
                     type="submit"
                     onClick={handleSubmit}
                     disabled={
-                      isSubmitting ||
+                      isAssigning ||
                       !selectedRoleId ||
                       !selectedMenuId ||
                       selectedPermissions.length === 0
                     }
                     className={`flex items-center gap-2 px-6 py-2.5 rounded-lg shadow-sm transition-all duration-200 ${
-                      isSubmitting ||
+                      isAssigning ||
                       !selectedRoleId ||
                       !selectedMenuId ||
                       selectedPermissions.length === 0
@@ -890,7 +917,7 @@ const AssignPermission = () => {
                         : "bg-blue-600 hover:bg-blue-700 text-white hover:shadow"
                     }`}
                   >
-                    {isSubmitting ? (
+                    {isAssigning ? (
                       <>
                         <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                         <span>Assigning Permissions...</span>
