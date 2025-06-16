@@ -2,11 +2,14 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast, Toaster } from "react-hot-toast";
 import api from "./axiosInstance";
+import GlobalLoader from "./GlobalLoader";
 
 function Login() {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [errorMessage, setErrorMessage] = useState("");
   const [validationErrors, setValidationErrors] = useState({});
+  const [loading, setLoading] = useState(false);
+
   const navigate = useNavigate();
 
   // Handle input changes
@@ -39,41 +42,44 @@ function Login() {
       return;
     }
 
-    try {
-      const response = await api.post(`auth/login`, formData);
+  try {
+    setLoading(true); // 👉 Start loader
 
-      if (response.data.success && response.data.data.token) {
-        // Store token in localStorage
-        localStorage.setItem("token", response.data.data.token);
-        localStorage.setItem("roleName", response.data.data.roleName);
-        localStorage.setItem("roleID", response.data.data.roleID);
-        localStorage.setItem("permission", JSON.stringify(response.data.data.permissions));
-        localStorage.setItem("refreshToken", response.data.data.refreshToken);
+    const response = await api.post(`auth/login`, formData);
 
-        toast.success("Login successful!");
+    if (response.data.success && response.data.data.token) {
+      localStorage.setItem("token", response.data.data.token);
+      localStorage.setItem("roleName", response.data.data.roleName);
+      localStorage.setItem("roleID", response.data.data.roleID);
+      localStorage.setItem("permission", JSON.stringify(response.data.data.permissions));
+      localStorage.setItem("refreshToken", response.data.data.refreshToken);
 
-        // Reset form
-        setFormData({ email: "", password: "" });
-        setValidationErrors({});
-        setErrorMessage("");
+      toast.success("Login successful!");
 
-        // Navigate after short delay
-        setTimeout(() => {
-          navigate("/userdashboard", { replace: true });
-        }, 2000);
-      } else {
-        setErrorMessage(response.data.message || "Invalid email or password.");
-        toast.error(response.data.message || "Invalid email or password.");
-      }
-    } catch (error) {
-      console.error("Login Error:", error);
-      const msg = error.response?.data?.message || "Invalid Credentials. Please try again.";
-      setErrorMessage(msg);
-      toast.error(msg);
-      // toast.error(msg, { duration: 3000 });
+      setFormData({ email: "", password: "" });
+      setValidationErrors({});
+      setErrorMessage("");
 
+      // Navigate after short delay
+      setTimeout(() => {
+        setLoading(false); // 👉 Stop loader before redirect
+        navigate("/userdashboard", { replace: true });
+      }, 1000);
+    } else {
+      setLoading(false); // 👉 Stop loader if failed
+      setErrorMessage(response.data.message || "Invalid email or password.");
+      toast.error(response.data.message || "Invalid email or password.");
     }
-  };
+  } catch (error) {
+    setLoading(false); // 👉 Stop loader on error
+    console.error("Login Error:", error);
+    const msg = error.response?.data?.message || "Invalid Credentials. Please try again.";
+    setErrorMessage(msg);
+    toast.error(msg);
+  }
+};
+
+  if (loading) return <GlobalLoader />;
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100">
@@ -134,6 +140,12 @@ function Login() {
               <p className="text-red-500 text-sm mt-1">{validationErrors.password}</p>
             )}
           </div>
+            {/* 👉 Add Forgot Password link here */}
+  <p className="text-right text-sm mt-1">
+    <Link to="/forgot-password" className="text-blue-600 hover:underline">
+      Forgot password?
+    </Link>
+  </p>
 
           <div className="pt-2">
             <button

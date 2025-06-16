@@ -628,6 +628,7 @@ import { toast } from "react-hot-toast";
 import { Menu as MenuIcon, Save, Trash2, Edit, ChevronDown, X } from "lucide-react";
 import Sidebar from "./Sidebar";
 import TableFilter from "./TableFilter";
+import GlobalLoader from "./GlobalLoader";
 import {
   fetchMenus,
   createMenu,
@@ -1146,9 +1147,11 @@ const MenuManagement = () => {
             )}
             
             {loading ? (
-              <div className="flex justify-center items-center h-40">
-                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-600"></div>
-              </div>
+              // <div className="flex justify-center items-center h-40">
+              //   <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-600"></div>
+              // </div>
+                                          <GlobalLoader message="Loading menus..." />
+
             ) : filteredMenus.length === 0 ? (
               <p className="text-gray-500 text-center py-4">
                 {filters.length ? "No menus match your filters" : "No menus found"}

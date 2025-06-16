@@ -422,6 +422,7 @@ import Sidebar from "./Sidebar";
 import { toast, Toaster } from "react-hot-toast";
 import Select from "react-select";
 import { fetchPermissions, deletePermission, resetStatus } from "../../features/Permissions/permissionSlice";
+import GlobalLoader from "./GlobalLoader";
 
 const ListPermissions = () => {
   const navigate = useNavigate();
@@ -677,9 +678,11 @@ const ListPermissions = () => {
           {canRead && (
             <div className="bg-white rounded-3xl shadow-2xl border border-gray-200 overflow-hidden transition-all duration-300">
               {loading ? (
-                <div className="flex justify-center items-center py-20">
-                  <Loader2 className="animate-spin w-8 h-8 text-blue-600" />
-                </div>
+                            <GlobalLoader message="Loading permissions..." />
+
+                // <div className="flex justify-center items-center py-20">
+                //   <Loader2 className="animate-spin w-8 h-8 text-blue-600" />
+                // </div>
               ) : filteredPermissions.length === 0 ? (
                 <p className="text-center text-gray-500 py-20 text-lg font-medium animate-fade-in">
                   {searchQuery || filters.length > 0 ? '🔍 No permissions found for the current search/filter criteria.' : '🚫 No permissions found.'}

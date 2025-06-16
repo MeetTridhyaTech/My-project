@@ -592,6 +592,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { fetchRoles, deleteRole, resetStatus } from '../../features/Roles/RoleSlice'; // Adjust import path as needed
 import Sidebar from './Sidebar';
 import Select from 'react-select';
+import GlobalLoader from './GlobalLoader';
 
 const RoleManagement = () => {
   const navigate = useNavigate();
@@ -849,7 +850,8 @@ const RoleManagement = () => {
           )}
 
           {loading ? (
-            <TableSkeleton />
+            <GlobalLoader message="Loading roles..." />
+            // <TableSkeleton />
           ) : (
             <div className="overflow-x-auto">
               <table className="min-w-full table-auto border border-gray-200 rounded-lg overflow-hidden">

@@ -20,6 +20,9 @@ import AddPermission from "./components/AddPermission";
 import PermissionRoute from "./components/PermissionRoute";
 import UnauthorizedAccess from "./components/UnauthorizedAccess";
 import TableFilter from "./components/TableFilter";
+import GlobalLoader from "./components/GlobalLoader";
+import ForgotPassword from "./components/auth/ForgotPassword";
+import ResetPassword from "./components/auth/ResetPassword";
 
 
 function App() {
@@ -31,6 +34,9 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/userdashboard" element={<UserDashboard />} />
         <Route path="/tablefilter" element={<TableFilter/>} /> 
+        <Route path="/loader" element={<GlobalLoader/>}/>
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
         
         {/* Protected by PermissionRoute */}
         <Route path="/userlist/:menuId?" element={

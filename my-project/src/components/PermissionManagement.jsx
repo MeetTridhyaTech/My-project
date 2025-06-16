@@ -232,6 +232,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 // import api from "./axiosInstance";
 // import { toast } from "react-hot-toast";
+import GlobalLoader from "./GlobalLoader";
 import {
   Trash2,
   Shield,
@@ -372,12 +373,14 @@ const PermissionManagement = () => {
 
             <div className="p-6">
               {loading ? (
-                <div className="flex justify-center items-center py-16">
-                  <div className="flex flex-col items-center gap-4">
-                    <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-                    <p className="text-gray-600">Loading permissions...</p>
-                  </div>
-                </div>
+                // <div className="flex justify-center items-center py-16">
+                //   <div className="flex flex-col items-center gap-4">
+                //     <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                //     <p className="text-gray-600">Loading permissions...</p>
+                //   </div>
+                // </div>
+                                            <GlobalLoader message="Loading role menu permissions..." />
+
               ) : (
                 <>
                   {permissions.length === 0 ? (

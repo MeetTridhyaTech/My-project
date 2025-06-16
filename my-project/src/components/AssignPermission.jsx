@@ -553,24 +553,44 @@ const AssignPermission = () => {
     });
   };
 
+  // const selectMenu = async (menuIdSelected) => {
+  //   setSelectedMenuId(menuIdSelected);
+  //   setIsMenuDropdownOpen(false);
+    
+  //   // Reset selected permissions when menu changes
+  //   setSelectedPermissions([]);
+    
+  //   const menuName = 
+  //     menus.find((menu) => menu.id === menuIdSelected)?.name || 
+  //     menus.find((menu) => menu.menuId === menuIdSelected)?.menuName || 
+  //     menus.find((menu) => menu.title === menuIdSelected)?.title;
+    
+  //   toast.success(`Menu "${menuName}" selected`, {
+  //     icon: "📁",
+  //     duration: 2000,
+  //     id: "menu-selected-toast",
+  //   });
+  // };
+
   const selectMenu = async (menuIdSelected) => {
-    setSelectedMenuId(menuIdSelected);
-    setIsMenuDropdownOpen(false);
-    
-    // Reset selected permissions when menu changes
-    setSelectedPermissions([]);
-    
-    const menuName = 
-      menus.find((menu) => menu.id === menuIdSelected)?.name || 
-      menus.find((menu) => menu.menuId === menuIdSelected)?.menuName || 
-      menus.find((menu) => menu.title === menuIdSelected)?.title;
-    
-    toast.success(`Menu "${menuName}" selected`, {
-      icon: "📁",
-      duration: 2000,
-      id: "menu-selected-toast",
-    });
-  };
+  setSelectedMenuId(menuIdSelected);
+  setIsMenuDropdownOpen(false);
+  setSelectedPermissions([]);
+
+  const selectedMenu = menus.find((menu) => {
+    const id = menu.id || menu.menuId || menu.menuID;
+    return id === menuIdSelected;
+  });
+
+  const menuName = selectedMenu?.name || selectedMenu?.menuName || selectedMenu?.title || "Unnamed Menu";
+
+  toast.success(`Menu "${menuName}" selected`, {
+    icon: "📁",
+    duration: 2000,
+    id: "menu-selected-toast",
+  });
+};
+
 
   const togglePermission = (permissionId) => {
     setSelectedPermissions((prev) => {
@@ -642,10 +662,18 @@ const AssignPermission = () => {
   const selectedRoleName =
     roles.find((role) => role.roleID === selectedRoleId)?.roleName || "Select a role";
 
-  const selectedMenuName = 
-    menus.find((menu) => menu.id === selectedMenuId)?.name || 
-    menus.find((menu) => menu.menuId === selectedMenuId)?.menuName || 
-    menus.find((menu) => menu.title === selectedMenuId)?.title || "Select a menu";
+  // const selectedMenuName = 
+  //   menus.find((menu) => menu.id === selectedMenuId)?.name || 
+  //   menus.find((menu) => menu.menuId === selectedMenuId)?.menuName || 
+  //   menus.find((menu) => menu.title === selectedMenuId)?.title || "Select a menu";
+
+  const selectedMenu = menus.find((menu) => {
+  const id = menu.id || menu.menuId || menu.menuID;
+  return id === selectedMenuId;
+});
+
+const selectedMenuName = selectedMenu?.name || selectedMenu?.menuName || selectedMenu?.title || "Select a menu";
+
 
   return (
     <div className="flex min-h-screen bg-gray-50">
