@@ -23,6 +23,7 @@ import TableFilter from "./components/TableFilter";
 import GlobalLoader from "./components/GlobalLoader";
 import ForgotPassword from "./components/auth/ForgotPassword";
 import ResetPassword from "./components/auth/ResetPassword";
+import VerifyOtp from "./components/auth/VerifyOtp";
 
 
 function App() {
@@ -37,6 +38,8 @@ function App() {
         <Route path="/loader" element={<GlobalLoader/>}/>
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/verify-otp" element={<VerifyOtp />} />
+
         
         {/* Protected by PermissionRoute */}
         <Route path="/userlist/:menuId?" element={

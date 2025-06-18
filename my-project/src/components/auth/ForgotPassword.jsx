@@ -73,8 +73,9 @@ function ForgotPassword() {
       const response = await api.post("auth/forgot-password", { email });
 
       if (response.status === 200) {
+      localStorage.setItem("resetEmail", email);
         toast.success("OTP sent to your email.");
-        setTimeout(() => navigate("/reset-password", { state: { email } }), 1000);
+        setTimeout(() => navigate("/verify-otp", { state: { email } }), 1000);
       }
     } catch (error) {
       const errorMessage = error.response?.data?.message || "Something went wrong.";
