@@ -169,6 +169,7 @@
 // export default Login;
 
 
+
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast, Toaster } from "react-hot-toast";
@@ -216,6 +217,7 @@ function Login() {
 
       if (response.data.success && response.data.data.token) {
         localStorage.setItem("token", response.data.data.token);
+        localStorage.setItem("userId", response.data.data.id);
         localStorage.setItem("roleName", response.data.data.roleName);
         localStorage.setItem("roleID", response.data.data.roleID);
         localStorage.setItem("permission", JSON.stringify(response.data.data.permissions));

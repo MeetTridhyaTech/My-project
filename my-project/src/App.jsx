@@ -24,6 +24,7 @@ import GlobalLoader from "./components/GlobalLoader";
 import ForgotPassword from "./components/auth/ForgotPassword";
 import ResetPassword from "./components/auth/ResetPassword";
 import VerifyOtp from "./components/auth/VerifyOtp";
+import ChatMessage from "./components/ChatMessage";
 
 
 function App() {
@@ -39,6 +40,7 @@ function App() {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/verify-otp" element={<VerifyOtp />} />
+        <Route path="/chat-message" element={<ChatMessage/>}/>
 
         
         {/* Protected by PermissionRoute */}
