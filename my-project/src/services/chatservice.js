@@ -92,6 +92,7 @@ class ChatService {
 
       this.connection = new signalR.HubConnectionBuilder()
         .withUrl(`https://localhost:7047/chathub?access_token=${token}&userId=${userId}`)
+        // .withUrl(`http://172.16.3.84:8086/chathub?access_token=${token}&userId=${userId}`)
         .withAutomaticReconnect()
         .build();
 
