@@ -15,6 +15,7 @@ import {
   Settings,
   ShoppingCart,
   FileText,
+  MessageCircle 
 } from "lucide-react";
 
 // Create an Axios instance with the base URL from the environment variable
@@ -35,6 +36,7 @@ const iconMapping = {
   ShoppingCart: ShoppingCart,
   Settings: Settings,
   FileText: FileText,
+  MessageCircle: MessageCircle
 };
 // const token = localStorage.getItem("token");
 // const roleName = localStorage.getItem("roleName");

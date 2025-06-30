@@ -13,7 +13,8 @@ import {
   LayoutDashboard,
   Menu as MenuIcon,
   Settings,
-  FileText
+  FileText,
+  MessageCircle
 } from "lucide-react";
 
 // Icon mapping object
@@ -26,7 +27,8 @@ const iconMapping = {
   "LayoutDashboard": LayoutDashboard,
   "Menu": MenuIcon,
   "Settings": Settings, 
-  "FileText": FileText
+  "FileText": FileText,
+  "MessageCircle": MessageCircle,
 };
 const token = localStorage.getItem("token"); 
 // Menu Component

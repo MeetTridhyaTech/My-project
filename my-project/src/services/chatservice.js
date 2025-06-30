@@ -75,7 +75,7 @@ class ChatService {
     try {
       const res = await api.get(`chat/history/${receiverId}`, {
         headers: { Authorization: `Bearer ${token}` },
-      });
+      });chatService
       return res.data;
     } catch (err) {
       console.error("Failed to fetch chat history:", err);
@@ -104,6 +104,11 @@ class ChatService {
       this.connection.on("MessageSent", (message) => {
         this.emit("messageSent", message);
       });
+
+      this.connection.on("UserTyping", (senderId)=>{
+        this.emit("userTyping", senderId);
+      });
+
 
       // Connection state handlers
       this.connection.onreconnecting(() => {
@@ -148,6 +153,19 @@ class ChatService {
       throw err;
     }
   }
+
+  async sendTypingNotification(receiverId) {
+  if (!this.connection || this.connection.state !== signalR.HubConnectionState.Connected) {
+    console.warn("Connection not established for typing notification");
+    return;
+  }
+
+  try {
+    await this.connection.invoke("SendTypingNotification", receiverId);
+  } catch (err) {
+    console.error("Failed to send typing notification:", err);
+  }
+}
 
   // Disconnect SignalR connection
   async disconnect() {

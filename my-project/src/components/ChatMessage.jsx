@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useMemo } from "react";
-import { Send, Search, MoreVertical, Phone, Video, Paperclip, Smile, Mic, Settings, LogOut, User, Bell, Plus, X, ChevronDown } from "lucide-react";
+import { Send, Search, MoreVertical, Phone, Video, Paperclip, Smile, Mic, Settings, LogOut, User, Bell } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import chatService from "../services/chatservice";
 
@@ -492,13 +492,13 @@ const ChatMessage = () => {
                 {/* Typing Indicator */}
                 {isTyping && (
                   <div className="flex justify-start animate-in slide-in-from-bottom-2">
-                    {/* <div className="bg-slate-200 text-slate-600 px-4 py-3 rounded-2xl rounded-bl-md dark:bg-slate-700 dark:text-slate-300">
+                    <div className="bg-slate-200 text-slate-600 px-4 py-3 rounded-2xl rounded-bl-md dark:bg-slate-700 dark:text-slate-300">
                       <div className="flex space-x-1">
                         <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce"></div>
                         <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
                         <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
                       </div>
-                    </div> */}
+                    </div>
                   </div>
                 )}
                 
@@ -516,7 +516,8 @@ const ChatMessage = () => {
                 <div className="flex-1 relative">
                   <textarea
                     value={inputMessage}
-                    onChange={(e) => setInputMessage(e.target.value)}
+                    // onChange={(e) => setInputMessage(e.target.value)}
+  onChange={handleTyping} // ✅ Replaced here
                     onKeyPress={handleKeyPress}
                     placeholder="Type your message..."
                     rows={1}
