@@ -2,12 +2,14 @@ import { useEffect, useRef, useState, useMemo } from "react";
 import { Send, Search, MoreVertical, Phone, Video, Paperclip, Smile, Mic, Settings, LogOut, User, Bell } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import chatService from "../services/chatservice";
+import EmojiPicker from 'emoji-picker-react';
 
 const ChatMessage = () => {
   const [users, setUsers] = useState([]);
   const [receiver, setReceiver] = useState(null);
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState("");
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [notificationPermission, setNotificationPermission] = useState("default");
@@ -16,6 +18,7 @@ const ChatMessage = () => {
   const [showSettingsMenu, setShowSettingsMenu] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const [onlineUsers, setOnlineUsers] = useState(new Set());
+  const typingTimeoutRef = useRef(null);
 
   const messagesEndRef = useRef(null);
   const notificationSoundRef = useRef(null);
@@ -24,6 +27,11 @@ const ChatMessage = () => {
 
   const userId = localStorage.getItem("userId");
   const token = localStorage.getItem("token");
+
+  const handleEmojiClick = (emojiData) => {
+    setInputMessage((prev) => prev + emojiData.emoji);
+    setShowEmojiPicker(false); // hide after picking
+  };
 
   // Close settings menu when clicking outside
   useEffect(() => {
@@ -98,7 +106,7 @@ const ChatMessage = () => {
         console.error("Failed to fetch users:", err);
       }
     };
-    
+
     fetchUsersAndLastMessages();
   }, [token, userId]);
 
@@ -107,11 +115,11 @@ const ChatMessage = () => {
     const handleMessageReceived = (message) => {
       if (message.senderId === receiver?.id || message.receiverId === receiver?.id) {
         setMessages(prev => [...prev, message]);
-        
+
         const otherUserId = message.senderId === userId ? message.receiverId : message.senderId;
         setLastMessageTimes(prev => ({ ...prev, [otherUserId]: message.sentAt }));
         setLastMessages(prev => ({ ...prev, [otherUserId]: message.message }));
-        
+
         if (message.senderId !== userId) {
           const sender = users.find(u => u.id === message.senderId);
           showNotification(
@@ -134,16 +142,16 @@ const ChatMessage = () => {
     // };
 
     const handleMessageSent = (message) => {
-  if (message.senderId === receiver?.id || message.receiverId === receiver?.id) {
-    setMessages(prev => [...prev, message]);
-    setLastMessageTimes(prev => ({ ...prev, [message.receiverId]: message.sentAt }));
-    setLastMessages(prev => ({ ...prev, [message.receiverId]: message.message }));
+      if (message.senderId === receiver?.id || message.receiverId === receiver?.id) {
+        setMessages(prev => [...prev, message]);
+        setLastMessageTimes(prev => ({ ...prev, [message.receiverId]: message.sentAt }));
+        setLastMessages(prev => ({ ...prev, [message.receiverId]: message.message }));
 
-    // Play sound and vibrate when *you* send message
-    playNotificationSound();
-    vibrate();
-  }
-};
+        // Play sound and vibrate when *you* send message
+        playNotificationSound();
+        vibrate();
+      }
+    };
 
 
     const handleConnectionStateChanged = (connected) => {
@@ -154,11 +162,27 @@ const ChatMessage = () => {
     chatService.on("messageSent", handleMessageSent);
     chatService.on("connectionStateChanged", handleConnectionStateChanged);
 
+    const handleUserTyping = (senderId) => {
+      if (receiver && senderId === receiver.id) {
+        setIsTyping(true);
+        clearTimeout(typingTimeoutRef.current);
+        typingTimeoutRef.current = setTimeout(() => setIsTyping(false), 1500);
+      }
+    };
+    chatService.on("userTyping", handleUserTyping);
+
+    // return () => {
+    //   chatService.off("messageReceived", handleMessageReceived);
+    //   chatService.off("messageSent", handleMessageSent);
+    //   chatService.off("connectionStateChanged", handleConnectionStateChanged);
+    // };
     return () => {
       chatService.off("messageReceived", handleMessageReceived);
       chatService.off("messageSent", handleMessageSent);
       chatService.off("connectionStateChanged", handleConnectionStateChanged);
+      chatService.off("userTyping", handleUserTyping); // ✅ Unsubscribe typing
     };
+
   }, [receiver, userId, users, notificationPermission]);
 
   // Initialize connection and load chat history when receiver changes
@@ -213,13 +237,26 @@ const ChatMessage = () => {
       .sort((a, b) => {
         const timeA = lastMessageTimes[a.id] || 0;
         const timeB = lastMessageTimes[b.id] || 0;
-        
+
         if (timeA && timeB) return new Date(timeB) - new Date(timeA);
         if (timeA && !timeB) return -1;
         if (!timeA && timeB) return 1;
         return `${a.firstName} ${a.lastName}`.localeCompare(`${b.firstName} ${b.lastName}`);
       });
   }, [users, searchTerm, lastMessageTimes]);
+
+  const handleTyping = (e) => {
+    const value = e.target.value;
+    setInputMessage(value);
+
+    if (receiver && chatService.getConnectionState()) {
+      try {
+        chatService.connection.invoke("SendTypingNotification", receiver.id);
+      } catch (err) {
+        console.error("Typing notification error:", err);
+      }
+    }
+  };
 
   const handleSend = async () => {
     if (!inputMessage.trim() || !receiver) return;
@@ -254,7 +291,7 @@ const ChatMessage = () => {
     const now = new Date();
     const messageDate = new Date(date);
     const diffDays = Math.ceil((now - messageDate) / (1000 * 60 * 60 * 24));
-    
+
     if (diffDays === 1) return 'Today';
     if (diffDays === 2) return 'Yesterday';
     if (diffDays <= 7) return messageDate.toLocaleDateString([], { weekday: 'short' });
@@ -284,7 +321,7 @@ const ChatMessage = () => {
   const getRandomGradient = (id) => {
     const gradients = [
       'from-purple-500 to-pink-500',
-      'from-blue-500 to-cyan-500', 
+      'from-blue-500 to-cyan-500',
       'from-green-500 to-teal-500',
       'from-orange-500 to-red-500',
       'from-indigo-500 to-purple-500',
@@ -311,25 +348,25 @@ const ChatMessage = () => {
                 <p className="text-indigo-100 text-sm">{users.length} conversations</p>
               </div>
             </div>
-            
+
             <div className="relative" ref={settingsMenuRef}>
-              <button 
+              <button
                 onClick={toggleSettingsMenu}
                 className="p-2 hover:bg-white/20 rounded-full transition-all duration-200 backdrop-blur-sm"
               >
                 <Settings className="w-5 h-5" />
               </button>
-              
+
               {showSettingsMenu && (
                 <div className="absolute right-0 top-12 w-56 bg-white rounded-xl shadow-2xl py-2 z-50 border border-slate-200 animate-in slide-in-from-top-2 dark:bg-slate-800 dark:border-slate-700">
-                  <button 
+                  <button
                     className="flex items-center px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 w-full text-left transition-colors dark:text-slate-300 dark:hover:bg-slate-700"
                     onClick={() => console.log("Profile clicked")}
                   >
                     <User className="w-4 h-4 mr-3 text-indigo-500" />
                     <span>Profile Settings</span>
                   </button>
-                  <button 
+                  <button
                     className="flex items-center px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 w-full text-left transition-colors dark:text-slate-300 dark:hover:bg-slate-700"
                     onClick={() => console.log("Notifications clicked")}
                   >
@@ -337,7 +374,7 @@ const ChatMessage = () => {
                     <span>Notifications</span>
                   </button>
                   <hr className="my-2 border-slate-200 dark:border-slate-700" />
-                  <button 
+                  <button
                     className="flex items-center px-4 py-3 text-sm text-red-600 hover:bg-red-50 w-full text-left transition-colors dark:hover:bg-red-900/20"
                     onClick={handleLogout}
                   >
@@ -348,7 +385,7 @@ const ChatMessage = () => {
               )}
             </div>
           </div>
-          
+
           {/* Search Bar */}
           <div className="relative">
             <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-4 h-4 text-white/60" />
@@ -368,20 +405,18 @@ const ChatMessage = () => {
             <div
               key={user.id}
               onClick={() => setReceiver(user)}
-              className={`group flex items-center p-4 m-2 cursor-pointer rounded-xl transition-all duration-200 hover:shadow-md animate-in slide-in-from-left ${
-                receiver?.id === user.id 
-                  ? "bg-gradient-to-r from-indigo-50 to-purple-50 shadow-lg border-l-4 border-indigo-500 dark:from-indigo-900/30 dark:to-purple-900/30" 
-                  : "hover:bg-slate-50 dark:hover:bg-slate-800/50"
-              }`}
+              className={`group flex items-center p-4 m-2 cursor-pointer rounded-xl transition-all duration-200 hover:shadow-md animate-in slide-in-from-left ${receiver?.id === user.id
+                ? "bg-gradient-to-r from-indigo-50 to-purple-50 shadow-lg border-l-4 border-indigo-500 dark:from-indigo-900/30 dark:to-purple-900/30"
+                : "hover:bg-slate-50 dark:hover:bg-slate-800/50"
+                }`}
               style={{ animationDelay: `${index * 50}ms` }}
             >
               <div className="relative mr-4">
                 <div className={`w-12 h-12 bg-gradient-to-br ${getRandomGradient(user.id)} rounded-full flex items-center justify-center text-white font-semibold text-sm shadow-lg`}>
                   {getInitials(user.firstName, user.lastName)}
                 </div>
-                <div className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-white shadow-sm ${
-                  onlineUsers.has(user.id) ? 'bg-green-500' : 'bg-slate-400'
-                }`}></div>
+                <div className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-white shadow-sm ${onlineUsers.has(user.id) ? 'bg-green-500' : 'bg-slate-400'
+                  }`}></div>
               </div>
 
               <div className="flex-1 min-w-0">
@@ -419,9 +454,8 @@ const ChatMessage = () => {
                     <div className={`w-12 h-12 bg-gradient-to-br ${getRandomGradient(receiver.id)} rounded-full flex items-center justify-center text-white font-semibold shadow-lg`}>
                       {getInitials(receiver.firstName, receiver.lastName)}
                     </div>
-                    <div className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-white shadow-sm ${
-                      onlineUsers.has(receiver.id) ? 'bg-green-500' : 'bg-slate-400'
-                    }`}></div>
+                    <div className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-white shadow-sm ${onlineUsers.has(receiver.id) ? 'bg-green-500' : 'bg-slate-400'
+                      }`}></div>
                   </div>
                   <div>
                     <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">
@@ -435,14 +469,17 @@ const ChatMessage = () => {
                         </>
                       ) : (
                         <>
-                          <div className="w-2 h-2 bg-yellow-500 rounded-full mr-2 animate-pulse"></div>
-                          Connecting...
+                          <div className="text-sm text-slate-500 dark:text-slate-400 flex items-center">
+                            <div className="w-2 h-2 bg-yellow-500 rounded-full mr-2 animate-pulse"></div>
+                            Connecting...
+                          </div>
+
                         </>
                       )}
                     </p>
                   </div>
                 </div>
-                
+
                 <div className="flex items-center space-x-2">
                   <button className="p-3 text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-full transition-all duration-200 dark:text-slate-400 dark:hover:bg-slate-800">
                     <Phone className="w-5 h-5" />
@@ -470,16 +507,14 @@ const ChatMessage = () => {
                     >
                       <div className={`group max-w-xs lg:max-w-md ${isSender ? "order-2" : "order-1"}`}>
                         <div
-                          className={`px-4 py-3 rounded-2xl shadow-sm transition-all duration-200 group-hover:shadow-md ${
-                            isSender
-                              ? "bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-br-md"
-                              : "bg-white text-slate-800 rounded-bl-md border border-slate-200 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700"
-                          }`}
+                          className={`px-4 py-3 rounded-2xl shadow-sm transition-all duration-200 group-hover:shadow-md ${isSender
+                            ? "bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-br-md"
+                            : "bg-white text-slate-800 rounded-bl-md border border-slate-200 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700"
+                            }`}
                         >
                           <div className="break-words leading-relaxed">{msg.message}</div>
-                          <div className={`text-xs mt-2 flex items-center justify-end space-x-1 ${
-                            isSender ? "text-indigo-100" : "text-slate-500 dark:text-slate-400"
-                          }`}>
+                          <div className={`text-xs mt-2 flex items-center justify-end space-x-1 ${isSender ? "text-indigo-100" : "text-slate-500 dark:text-slate-400"
+                            }`}>
                             <span>{msg.sentAt ? formatTime(msg.sentAt) : "Sending..."}</span>
                             {isSender && <span className="text-indigo-200">✓✓</span>}
                           </div>
@@ -488,7 +523,7 @@ const ChatMessage = () => {
                     </div>
                   );
                 })}
-                
+
                 {/* Typing Indicator */}
                 {isTyping && (
                   <div className="flex justify-start animate-in slide-in-from-bottom-2">
@@ -501,7 +536,7 @@ const ChatMessage = () => {
                     </div>
                   </div>
                 )}
-                
+
                 <div ref={messagesEndRef} />
               </div>
             </div>
@@ -512,12 +547,11 @@ const ChatMessage = () => {
                 <button className="p-3 text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-full transition-all duration-200 dark:text-slate-400 dark:hover:bg-slate-800">
                   <Paperclip className="w-5 h-5" />
                 </button>
-                
+
                 <div className="flex-1 relative">
                   <textarea
                     value={inputMessage}
-                    // onChange={(e) => setInputMessage(e.target.value)}
-  onChange={handleTyping} // ✅ Replaced here
+                    onChange={handleTyping} 
                     onKeyPress={handleKeyPress}
                     placeholder="Type your message..."
                     rows={1}
@@ -525,9 +559,20 @@ const ChatMessage = () => {
                     disabled={!receiver || !isConnected}
                     style={{ minHeight: '56px', maxHeight: '120px' }}
                   />
-                  <button className="absolute right-4 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-indigo-600 transition-colors">
+                  <button
+                    type="button"
+                    onClick={() => setShowEmojiPicker(prev => !prev)}
+                    className="absolute right-4 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-indigo-600 transition-colors"
+                  >
                     <Smile className="w-5 h-5" />
                   </button>
+
+                  {/* Emoji Picker Component */}
+                  {showEmojiPicker && (
+                    <div className="absolute bottom-16 right-0 z-50">
+                      <EmojiPicker onEmojiClick={handleEmojiClick} />
+                    </div>
+                  )}
                 </div>
 
                 {inputMessage.trim() ? (
