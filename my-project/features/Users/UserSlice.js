@@ -1,87 +1,3 @@
-// // src/redux/slices/userSlice.js
-// import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-// import api from '../../src/components/axiosInstance';
-
-// const menuId = '17DEC13F-8C9F-4287-A918-774375AC1B76';
-
-// export const fetchUserById = createAsyncThunk(
-//   'user/fetchUserById',
-//   async (id, { rejectWithValue }) => {
-//     try {
-//       const response = await api.get(`User/${id}/${menuId}`);
-//       return response.data.data;
-//     } catch (err) {
-//       return rejectWithValue(err.response.data.message || 'Failed to fetch user.');
-//     }
-//   }
-// );
-
-// export const updateUser = createAsyncThunk(
-//   'user/updateUser',
-//   async ({ id, formData }, { rejectWithValue }) => {
-//     try {
-//       const payload = {
-//         firstName: formData.firstName,
-//         lastName: formData.lastName,
-//         email: formData.email,
-//         mobile: formData.mobile,
-//         password: formData.password,
-//         roleID: formData.roleName?.value
-//       };
-//       await api.post(`User/AddOrUpdate/${menuId}?id=${id}`, payload);
-//       return 'User updated successfully';
-//     } catch (err) {
-//       return rejectWithValue(err.response?.data?.message || 'Failed to update user.');
-//     }
-//   }
-// );
-
-// const userSlice = createSlice({
-//   name: 'user',
-//   initialState: {
-//     user: null,
-//     loading: false,
-//     error: '',
-//     successMessage: ''
-//   },
-//   reducers: {
-//     clearMessages: (state) => {
-//       state.error = '';
-//       state.successMessage = '';
-//     }
-//   },
-//   extraReducers: (builder) => {
-//     builder
-//       .addCase(fetchUserById.pending, (state) => {
-//         state.loading = true;
-//         state.error = '';
-//       })
-//       .addCase(fetchUserById.fulfilled, (state, action) => {
-//         state.loading = false;
-//         state.user = action.payload;
-//       })
-//       .addCase(fetchUserById.rejected, (state, action) => {
-//         state.loading = false;
-//         state.error = action.payload;
-//       })
-//       .addCase(updateUser.pending, (state) => {
-//         state.loading = true;
-//       })
-//       .addCase(updateUser.fulfilled, (state, action) => {
-//         state.loading = false;
-//         state.successMessage = action.payload;
-//       })
-//       .addCase(updateUser.rejected, (state, action) => {
-//         state.loading = false;
-//         state.error = action.payload;
-//       });
-//   }
-// });
-
-// export const { clearMessages } = userSlice.actions;
-// export default userSlice.reducer;
-
-
 // src/redux/slices/userSlice.js
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import api from '../../src/components/axiosInstance';
@@ -264,7 +180,7 @@ const userSlice = createSlice({
     },
     setPageSize: (state, action) => {
       state.pageSize = action.payload;
-      state.currentPage = 1; // Reset to first page when changing page size
+      state.currentPage = 1;
     },
     setSortBy: (state, action) => {
       state.sortBy = action.payload;
@@ -274,11 +190,11 @@ const userSlice = createSlice({
     },
     setSearchTerm: (state, action) => {
       state.searchTerm = action.payload;
-      state.currentPage = 1; // Reset to first page when searching
+      state.currentPage = 1;
     },
     setFilters: (state, action) => {
       state.filters = action.payload;
-      state.currentPage = 1; // Reset to first page when filtering
+      state.currentPage = 1;
     },
     addFilter: (state, action) => {
       const { columnName, condition, value } = action.payload;

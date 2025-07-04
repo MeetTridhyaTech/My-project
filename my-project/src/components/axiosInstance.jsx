@@ -20,7 +20,7 @@ const processQueue = (error, token = null) => {
     } else {
       prom.resolve(token);
     }
-  });
+  }); 
   failedQueue = [];
 };
 
