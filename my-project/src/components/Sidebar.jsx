@@ -108,12 +108,6 @@ console.log("Menus Response:", response.data); // Log the response data
     const IconComponent = iconMapping[iconName];
     return IconComponent ? <IconComponent className="w-5 h-5 text-blue-300" /> : <User className="w-5 h-5 text-blue-300" />;
   };
-
-  // // Check if user has permission to see the menu
-  // const hasPermission = (menu) => {
-  //   // Example of a role-based permission check
-  //   return menu.roleName === roleName;
-  // };
   const hasPermission = (menu) => {
   if (!menu.roleName || !roleName) return false;
   

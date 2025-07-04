@@ -102,12 +102,6 @@ const TableFilter = ({
               </button>
             </div>
           ))}
-          {/* <button
-            onClick={onResetFilters}
-            className="flex items-center gap-1 text-sm bg-gray-200 hover:bg-gray-300 px-3 py-1 rounded"
-          >
-            <X size={14} /> Clear All Filters
-          </button> */}
         </div>
       )}
 

@@ -16,7 +16,6 @@ import Menu from "./components/Menu";
 import MenuManagement from "./components/MenuManagement";
 import ListPermissions from "./components/ListPermissions";
 import AddPermission from "./components/AddPermission";
-// import UnauthorizedAccess from "./components/UnauthorizeAccess";
 import PermissionRoute from "./components/PermissionRoute";
 import UnauthorizedAccess from "./components/UnauthorizedAccess";
 import TableFilter from "./components/TableFilter";
