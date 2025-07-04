@@ -461,7 +461,7 @@ const ChatMessage = () => {
                     <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">
                       {receiver.firstName} {receiver.lastName}
                     </h2>
-                    <p className="text-sm text-slate-500 dark:text-slate-400 flex items-center">
+                    <div className="text-sm text-slate-500 dark:text-slate-400 flex items-center">
                       {isConnected ? (
                         <>
                           <div className="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></div>
@@ -476,7 +476,7 @@ const ChatMessage = () => {
 
                         </>
                       )}
-                    </p>
+                    </div>
                   </div>
                 </div>
 
