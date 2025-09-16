@@ -28,6 +28,18 @@ class ChatService {
       this.eventListeners[event].forEach(callback => callback(...args));
     }
   }
+  onReceiveOffer(callback) {
+  this.on("receiveOffer", callback);
+}
+
+onReceiveAnswer(callback) {
+  this.on("receiveAnswer", callback);
+}
+
+onReceiveIceCandidate(callback) {
+  this.on("receiveIceCandidate", callback);
+}
+
 
   // Fetch users with their last messages
   async fetchUsersAndLastMessages(token, userId) {
@@ -126,6 +138,22 @@ class ChatService {
         this.emit("connectionStateChanged", false);
       });
 
+      // WebRTC handlers
+this.connection.on("ReceiveOffer", (senderId, offer) => {
+  this.emit("receiveOffer", senderId, offer);
+});
+
+this.connection.on("ReceiveAnswer", (senderId, answer) => {
+  this.emit("receiveAnswer", senderId, answer);
+});
+
+this.connection.on("ReceiveIceCandidate", (senderId, candidate) => {
+  this.emit("receiveIceCandidate", senderId, candidate);
+});
+
+
+
+
       await this.connection.start();
       this.isConnected = true;
       this.emit("connectionStateChanged", true);
@@ -165,6 +193,8 @@ class ChatService {
   } catch (err) {
     console.error("Failed to send typing notification:", err);
   }
+
+  
 }
 
   // Disconnect SignalR connection
@@ -181,6 +211,27 @@ class ChatService {
       }
     }
   }
+  async sendOffer(receiverId, offer) {
+  if (!this.connection || this.connection.state !== signalR.HubConnectionState.Connected) {
+    throw new Error("Connection not established");
+  }
+  await this.connection.invoke("SendOffer", receiverId, offer);
+}
+
+async sendAnswer(receiverId, answer) {
+  if (!this.connection || this.connection.state !== signalR.HubConnectionState.Connected) {
+    throw new Error("Connection not established");
+  }
+  await this.connection.invoke("SendAnswer", receiverId, answer);
+}
+
+async sendIceCandidate(receiverId, candidate) {
+  if (!this.connection || this.connection.state !== signalR.HubConnectionState.Connected) {
+    throw new Error("Connection not established");
+  }
+  await this.connection.invoke("SendIceCandidate", receiverId, candidate);
+}
+
 
   // Get connection state
   getConnectionState() {

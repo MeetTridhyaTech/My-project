@@ -9,6 +9,7 @@ function ForgotPassword() {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
+  //Handle otp
   const handleSendOTP = async () => {
     if (!email) {
       toast.error("Email is required");
